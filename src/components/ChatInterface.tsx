@@ -79,12 +79,16 @@ const ChatInterface = ({
   };
 
   const handleInputChange = (value: string) => {
+    console.log(`Input change in ${column.id}:`, value, 'synced:', column.syncInputs);
     if (column.syncInputs) {
       onSyncedInputChange(value);
     } else {
       setLocalInput(value);
     }
   };
+
+  // Use the appropriate input value based on sync setting
+  const inputValue = column.syncInputs ? syncedInput : localInput;
 
   return (
     <Card className="w-[400px] min-w-[400px] flex flex-col h-full bg-card">
@@ -152,7 +156,7 @@ const ChatInterface = ({
       <CardFooter className="p-4">
         <form onSubmit={handleSubmit} className="flex w-full gap-2">
           <Input
-            value={column.syncInputs ? syncedInput : localInput}
+            value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Type a message..."
             disabled={isLoading}
