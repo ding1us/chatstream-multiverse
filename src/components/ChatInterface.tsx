@@ -13,51 +13,18 @@ import {
   Send,
   Loader2,
   RefreshCw,
-  ChevronDown,
 } from "lucide-react";
 import { ChatColumn } from "./ChatContainer";
 import ModelSettings from "./ModelSettings";
+import ModelSelector from "./ModelSelector";
 import { useChat } from "ai/react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-// Define all available models
-const AVAILABLE_MODELS = [
-  // OpenAI Models
-  "gpt-4-turbo-preview",
-  "gpt-4",
-  "gpt-3.5-turbo",
-  // Anthropic Models
-  "claude-3-opus",
-  "claude-3-sonnet",
-  "claude-2.1",
-  "claude-2",
-  "claude-instant",
-  // Google Models
-  "gemini-pro",
-  "gemini-pro-vision",
-  // Mistral Models
-  "mistral-tiny",
-  "mistral-small",
-  "mistral-medium",
-  // Meta Models
-  "llama-2-70b",
-  "llama-2-13b",
-  "llama-2-7b",
-  // Cohere Models
-  "command",
-  "command-light",
-  "command-nightly",
-] as const;
 
 interface ChatInterfaceProps {
   column: ChatColumn;
   onRemove: () => void;
   onUpdateSettings: (updates: Partial<ChatColumn>) => void;
+  syncedInput: string;
+  onSyncedInputChange: (value: string) => void;
 }
 
 interface Message {
@@ -69,22 +36,28 @@ const ChatInterface = ({
   column,
   onRemove,
   onUpdateSettings,
+  syncedInput,
+  onSyncedInputChange,
 }: ChatInterfaceProps) => {
   const [showSettings, setShowSettings] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [localInput, setLocalInput] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const input = form.elements.namedItem("message") as HTMLInputElement;
-    const message = input.value.trim();
+    const message = column.syncInputs ? syncedInput : localInput;
     
     if (!message) return;
     
     const userMessage: Message = { role: "user", content: message };
     setMessages(prev => [...prev, userMessage]);
-    input.value = "";
+    
+    if (column.syncInputs) {
+      onSyncedInputChange("");
+    } else {
+      setLocalInput("");
+    }
     
     setIsLoading(true);
     
@@ -105,29 +78,22 @@ const ChatInterface = ({
     setMessages([]);
   };
 
+  const handleInputChange = (value: string) => {
+    if (column.syncInputs) {
+      onSyncedInputChange(value);
+    } else {
+      setLocalInput(value);
+    }
+  };
+
   return (
     <Card className="w-[400px] min-w-[400px] flex flex-col h-full bg-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 font-semibold">
-                {column.model}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="max-h-[300px] overflow-y-auto w-[200px]">
-              {AVAILABLE_MODELS.map((model) => (
-                <DropdownMenuItem
-                  key={model}
-                  onClick={() => onUpdateSettings({ model })}
-                  className="cursor-pointer"
-                >
-                  {model}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ModelSelector
+            currentModel={column.model}
+            onModelSelect={(model) => onUpdateSettings({ model })}
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -186,7 +152,8 @@ const ChatInterface = ({
       <CardFooter className="p-4">
         <form onSubmit={handleSubmit} className="flex w-full gap-2">
           <Input
-            name="message"
+            value={column.syncInputs ? syncedInput : localInput}
+            onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Type a message..."
             disabled={isLoading}
           />

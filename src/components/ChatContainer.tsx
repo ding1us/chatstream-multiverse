@@ -10,6 +10,11 @@ export type ChatColumn = {
   apiKey: string;
   temperature: number;
   maxTokens: number;
+  topP: number;
+  frequencyPenalty: number;
+  presencePenalty: number;
+  systemPrompt: string;
+  syncInputs: boolean;
 };
 
 const ChatContainer = () => {
@@ -20,8 +25,15 @@ const ChatContainer = () => {
       apiKey: "",
       temperature: 0.7,
       maxTokens: 1000,
+      topP: 1,
+      frequencyPenalty: 0,
+      presencePenalty: 0,
+      systemPrompt: "",
+      syncInputs: true,
     },
   ]);
+
+  const [syncedInput, setSyncedInput] = useState("");
 
   const addChatColumn = () => {
     setChatColumns((prev) => [
@@ -32,6 +44,11 @@ const ChatContainer = () => {
         apiKey: "",
         temperature: 0.7,
         maxTokens: 1000,
+        topP: 1,
+        frequencyPenalty: 0,
+        presencePenalty: 0,
+        systemPrompt: "",
+        syncInputs: true,
       },
     ]);
   };
@@ -46,6 +63,17 @@ const ChatContainer = () => {
     );
   };
 
+  const handleSyncedInputChange = (value: string) => {
+    setSyncedInput(value);
+    // Update all columns that have syncInputs enabled
+    chatColumns.forEach((column) => {
+      if (column.syncInputs) {
+        // Handle the synced input for each column
+        console.log(`Syncing input for column ${column.id}: ${value}`);
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex-1 flex overflow-x-auto p-4 gap-4">
@@ -55,6 +83,8 @@ const ChatContainer = () => {
             column={column}
             onRemove={() => removeChatColumn(column.id)}
             onUpdateSettings={(updates) => updateColumnSettings(column.id, updates)}
+            syncedInput={syncedInput}
+            onSyncedInputChange={handleSyncedInputChange}
           />
         ))}
         <Button
