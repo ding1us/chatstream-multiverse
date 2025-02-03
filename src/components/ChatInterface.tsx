@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -13,12 +12,47 @@ import {
   Trash2,
   Send,
   Loader2,
-  XCircle,
   RefreshCw,
+  ChevronDown,
 } from "lucide-react";
 import { ChatColumn } from "./ChatContainer";
 import ModelSettings from "./ModelSettings";
 import { useChat } from "ai/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Define all available models
+const AVAILABLE_MODELS = [
+  // OpenAI Models
+  "gpt-4-turbo-preview",
+  "gpt-4",
+  "gpt-3.5-turbo",
+  // Anthropic Models
+  "claude-3-opus",
+  "claude-3-sonnet",
+  "claude-2.1",
+  "claude-2",
+  "claude-instant",
+  // Google Models
+  "gemini-pro",
+  "gemini-pro-vision",
+  // Mistral Models
+  "mistral-tiny",
+  "mistral-small",
+  "mistral-medium",
+  // Meta Models
+  "llama-2-70b",
+  "llama-2-13b",
+  "llama-2-7b",
+  // Cohere Models
+  "command",
+  "command-light",
+  "command-nightly",
+] as const;
 
 interface ChatInterfaceProps {
   column: ChatColumn;
@@ -48,15 +82,12 @@ const ChatInterface = ({
     
     if (!message) return;
     
-    // Add user message immediately
     const userMessage: Message = { role: "user", content: message };
     setMessages(prev => [...prev, userMessage]);
     input.value = "";
     
     setIsLoading(true);
     
-    // TODO: Implement actual API call using Vercel AI SDK
-    // This is a placeholder for now
     try {
       const assistantMessage: Message = {
         role: "assistant",
@@ -78,7 +109,25 @@ const ChatInterface = ({
     <Card className="w-[400px] min-w-[400px] flex flex-col h-full bg-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold">{column.model}</h3>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2 font-semibold">
+                {column.model}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-h-[300px] overflow-y-auto w-[200px]">
+              {AVAILABLE_MODELS.map((model) => (
+                <DropdownMenuItem
+                  key={model}
+                  onClick={() => onUpdateSettings({ model })}
+                  className="cursor-pointer"
+                >
+                  {model}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             variant="ghost"
             size="icon"
