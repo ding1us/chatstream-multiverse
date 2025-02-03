@@ -91,7 +91,7 @@ const ModelSettings = ({ settings, onUpdate, onClose }: ModelSettingsProps) => {
           </div>
         )}
 
-        {modelConfig?.frequencyPenalty && (
+        {'frequencyPenalty' in modelConfig && (
           <div className="space-y-2">
             <Label>Frequency Penalty: {settings.frequencyPenalty}</Label>
             <Slider
@@ -104,7 +104,7 @@ const ModelSettings = ({ settings, onUpdate, onClose }: ModelSettingsProps) => {
           </div>
         )}
 
-        {modelConfig?.presencePenalty && (
+        {'presencePenalty' in modelConfig && (
           <div className="space-y-2">
             <Label>Presence Penalty: {settings.presencePenalty}</Label>
             <Slider

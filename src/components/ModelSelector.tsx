@@ -48,7 +48,6 @@ export const MODEL_CONFIGS = {
     topP: { min: 0, max: 1, default: 1 },
     systemPrompt: true,
   },
-  // Add configurations for other models...
 } as const;
 
 export const AVAILABLE_MODELS = Object.keys(MODEL_CONFIGS);
