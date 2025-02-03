@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import ChatInterface from "./ChatInterface";
 import { nanoid } from "nanoid";
+import { ThemeToggle } from "./theme-toggle";
 
 export type ChatColumn = {
   id: string;
@@ -65,10 +66,8 @@ const ChatContainer = () => {
 
   const handleSyncedInputChange = (value: string) => {
     setSyncedInput(value);
-    // Update all columns that have syncInputs enabled
     chatColumns.forEach((column) => {
       if (column.syncInputs) {
-        // Handle the synced input for each column
         console.log(`Syncing input for column ${column.id}: ${value}`);
       }
     });
@@ -76,6 +75,9 @@ const ChatContainer = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      <div className="flex justify-end p-4">
+        <ThemeToggle />
+      </div>
       <div className="flex-1 flex overflow-x-auto p-4 gap-4">
         {chatColumns.map((column) => (
           <ChatInterface
